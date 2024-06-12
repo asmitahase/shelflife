@@ -1,0 +1,146 @@
+{% extends 'base.html' %} {% block title %}Book Details{% endblock %} {% block
+content %}
+<div class="p-4 flex flex-col items-center overflow-auto h-[692px]">
+  <div class="w-1/2">
+    <div class="flex flex-row justify-between">
+      <h1 class="text-2xl font-semibold mb-12 ml-2">Book Details</h1>
+      <div class="flex justify-between mr-4 mt-1 gap-2">
+        <a
+          class="w-24 h-8"
+          href="{{url_for('edit_book',book_id=book_details['isbn'])}}"
+        >
+          <button
+            class="bg-catalina-blue-600 hover:bg-catalina-blue-800 text-white font-extralight text-sm rounded-md h-full w-full"
+          >
+            Edit
+          </button>
+        </a>
+        <button
+          class="bg-white border border-catalina-blue-600 rounded-md text-sm text-catalina-blue-600 font-extralight hover:bg-gray-200 w-24 h-8"
+          id="delete-btn"
+        >
+          Delete
+        </button>
+        <dialog class="w-72 h-36 rounded-md shadow-lg">
+          <div class="p-6 h-full flex flex-col justify-between">
+            <div
+              class="font-semibold text-zinc-700 flex justify-center text-lg"
+            >
+              Delete the book?
+            </div>
+            <form action="{{url_for('delete_book')}}" method="post">
+              {{delete_book_form.csrf_token()}} {{delete_book_form.id()}}
+              <button
+                id="close-btn"
+                type="button"
+                class="float-left bg-white border border-catalina-blue-600 rounded-md text-sm text-catalina-blue-600 font-extralight hover:bg-gray-200 w-24 h-8"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="float-right bg-catalina-blue-600 hover:bg-catalina-blue-800 text-white font-extralight text-sm rounded-md w-24 h-8"
+              >
+                Delete
+              </button>
+            </form>
+          </div>
+        </dialog>
+        <script>
+          const modal = document.querySelector("dialog");
+          const deleteButton = document.querySelector("#delete-btn");
+          const closeButton = document.querySelector("#close-btn");
+          deleteButton.addEventListener("click", () => {
+            modal.showModal();
+          });
+          closeButton.addEventListener("click", () => {
+            modal.close();
+          });
+        </script>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 gap-4 gap-x-24">
+      <div class="">
+        <h3 class="font-extralight text-sm m-2">Title</h3>
+        <div class="font-semibold text-sm m-2">{{ book_details.title}}</div>
+      </div>
+      <div class="">
+        <h3 class="font-extralight text-sm m-2">Author(s)</h3>
+        <div class="font-semibold text-sm m-2">{{ book_details.authors}}</div>
+      </div>
+      <div class="">
+        <h3 class="font-extralight text-sm m-2">ISBN</h3>
+        <div class="font-semibold text-sm m-2">{{ book_details.isbn}}</div>
+      </div>
+      <div class="">
+        <h3 class="font-extralight text-sm m-2">ISBN 13</h3>
+        <div class="font-semibold text-sm m-2">{{ book_details.isbn13}}</div>
+      </div>
+      <div class="">
+        <h3 class="font-extralight text-sm m-2">Publisher</h3>
+        <div class="font-semibold text-sm m-2">{{ book_details.publisher}}</div>
+      </div>
+      <div class="">
+        <h3 class="font-extralight text-sm m-2">Publication Date</h3>
+        <div class="font-semibold text-sm m-2">
+          {{ book_details.publication_date}}
+        </div>
+      </div>
+      <div class="">
+        <h3 class="font-extralight text-sm m-2">Language Code</h3>
+        <div class="font-semibold text-sm m-2">
+          {{ book_details.language_code}}
+        </div>
+      </div>
+      <div class="">
+        <h3 class="font-extralight text-sm m-2">No of Pages</h3>
+        <div class="font-semibold text-sm m-2">
+          {{ book_details.num_of_pages}}
+        </div>
+      </div>
+      <div class="">
+        <h3 class="font-extralight text-sm m-2">Total Count</h3>
+        <div class="font-semibold text-sm m-2">
+          {{ book_details.total_count}}
+        </div>
+      </div>
+      <div class="">
+        <h3 class="font-extralight text-sm m-2">Rented Count</h3>
+        <div class="font-semibold text-sm m-2">
+          {{ book_details.rented_count}}
+        </div>
+      </div>
+      <div class="">
+        <h3 class="font-extralight text-sm m-2">Available Count</h3>
+        <div class="font-semibold text-sm m-2">
+          {{ book_details.available_count}}
+        </div>
+      </div>
+      <div class="">
+        <h3 class="font-extralight text-sm m-2">Total Ratings</h3>
+        <div class="font-semibold text-sm m-2">
+          {{ book_details.ratings_count}}
+        </div>
+      </div>
+      <div class="">
+        <h3 class="font-extralight text-sm m-2">Total Reviews</h3>
+        <div class="font-semibold text-sm m-2">
+          {{ book_details.text_reviews_count}}
+        </div>
+      </div>
+      <div class="">
+        <h3 class="font-extralight text-sm m-2">Average Rating</h3>
+        <div class="font-semibold text-sm m-2">
+          {{ book_details.average_rating}}
+        </div>
+      </div>
+      <div class="">
+        <h3 class="font-extralight text-sm m-2">Renting Cost</h3>
+        <div class="font-semibold text-sm m-2">
+          {{ book_details.renting_cost}}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

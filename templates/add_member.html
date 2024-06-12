@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Add Member{% endblock %}
+{% block content %}
+    <div class="p-4 flex flex-col items-center overflow-auto h-[692px]">
+        <div class="w-1/2">
+            <h1 class="text-2xl font-semibold mb-4 ml-4">Add a new Member</h1>
+            <div class="flex justify-center" id="message">
+                {% from 'includes/_formhelpers.html' import render_messages %}
+                {{ render_messages(get_flashed_messages()) }}
+              </div>
+            <form action="" method="post">
+                <!-- TODO Required indicator in label -->
+                {{add_member_form.csrf_token()}}
+                {% from 'includes/_formhelpers.html' import render_form_field %}
+                        {% for field in add_member_form._fields.values() if field.id != 'csrf_token' %}
+                        <div class="font-extralight text-sm m-4">
+                            {{render_form_field(field, class="p-2 mt-0.5 rounded-md bg-gray-200
+                            focus:outline-none focus:border-zinc-600 focus:ring-zinc-600
+                            focus:ring-2 w-full h-8 font-light text-sm")}}
+                            <!-- TODO language code could be a dropdown field -->
+                        </div>
+                        {% endfor %}
+                        <!-- TODO Inline form error messages -->
+                        <div class="mt-8">
+                            <a href="{{url_for('members')}}"><button type="button" class="bg-white border border-catalina-blue-600 text-catalina-blue-600 rounded-md text-sm font-extralight hover:bg-gray-300 w-24 h-9 ml-4 float-left">Cancel</button></a>
+                            <button type="submit" class="bg-catalina-blue-600 hover:bg-catalina-blue-800 text-white font-extralight text-sm rounded-md w-24 h-9 mr-4 float-right">Save</button>
+                        </div>
+                    </div>   
+            </form>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends 'base.html' %} {% block title %}Add book{% endblock %} {% block
+content %}
+<div class="p-4 flex flex-col items-center overflow-auto h-[692px]">
+  <div class="w-1/2">
+    <h1 class="text-2xl font-semibold mb-8 ml-4">
+      Select books to be returned
+    </h1>
+    <form action="" method="post">
+      {{return_book_form.csrf_token()}}
+      {{return_book_form.return_book(class="text-sm font-light text-zinc-600
+      *:border *:shadow-md *:m-2 *:h-16 *:rounded-md *:flex *:items-center *:p-4
+      *:gap-2")}}
+      <div
+        id="total-amount"
+        class="hidden mt-6 ml-2 text-sm font-semibold text-zinc-600"
+      ></div>
+      {{return_book_form.total_amount_paid()}}
+      <div class="mt-8">
+        <a href="{{url_for('members')}}"
+          ><button
+            type="button"
+            class="bg-white border border-catalina-blue-600 text-catalina-blue-600 rounded-md text-sm font-extralight hover:bg-gray-300 w-24 h-9 ml-2 float-left"
+            
+          >
+            Cancel
+          </button></a
+        >
+        <button
+          id="return-btn"
+          type="submit"
+          class="bg-catalina-blue-600 hover:bg-catalina-blue-800 text-white font-extralight text-sm rounded-md w-24 h-9 mr-2 float-right disabled:bg-gray-200 disabled:border disabled:border-gray-400 disabled:text-gray-500"
+          disabled
+        >
+          Return
+        </button>
+      </div>
+    </form>
+    <script>
+      const bookDetails = {{ books | tojson }}
+      const checkboxes = document.querySelectorAll("input[name='return_book']")
+      let amountToPay = 0
+      const totalAmountPaid = document.querySelector('#total_amount_paid')
+      const showTotalAmount = document.querySelector('#total-amount')
+      const returnButton = document.querySelector('#return-btn')
+      checkboxes.forEach(checkbox => {
+          checkbox.classList.add('accent-catalina-blue-600','w-4','h-4')
+          checkbox.addEventListener('click',(event)=>{
+                const isChecked = checkbox.checked
+                checkbox.parentElement.classList.toggle('bg-catalina-blue-900/10', isChecked)
+                amountToPay = isChecked ? amountToPay + getRentingCost(checkbox.value) : amountToPay -    getRentingCost(checkbox.value)
+                showTotalAmount.textContent = 'Total amount to pay : ' + amountToPay
+                totalAmountPaid.value = amountToPay
+                const anyBookSelected = [...checkboxes].some((checkbox)=>checkbox.checked)
+                showTotalAmount.classList.toggle('hidden',!anyBookSelected)
+                anyBookSelected ? returnButton.removeAttribute('disabled') : returnButton.setAttribute('disabled','')
+              })
+      });
+      function getRentingCost(bookId){
+          book = bookDetails.find((element)=>element['book_id'].toString() == bookId.toString())
+          return book.total_renting_cost
+      }
+    </script>
+  </div>
+</div>
+{% endblock %}

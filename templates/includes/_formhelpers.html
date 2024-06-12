@@ -1,0 +1,28 @@
+{% macro render_form_field(field) %}
+    {{field.label}}
+    {{field(**kwargs)|safe}}
+{% endmacro %}
+
+{% macro render_messages(messages)%}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                {% if category=='error' %}
+                <div class="inline-flex items-center rounded-md bg-red-50 pl-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10"> {{ message }}
+                    <span class="hover:bg-red-200 hover:cursor-pointer m-1 text-base" onclick="removeMessage()"><img src="{{url_for('static', filename = 'assets/cross-svg-red.svg')}}" class="h-3 w-3"></span>
+                </div>
+                {% elif category=='success' %}
+                <div class="inline-flex items-center rounded-md bg-green-50 pl-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/10"> {{ message }}
+                    <span class="hover:bg-green-200 hover:cursor-pointer m-1 text-base" onclick="removeMessage()"><img src="{{url_for('static', filename = 'assets/cross-svg-green.svg')}}" alt="" class="h-3 w-3"></span>
+                </div>
+                {% endif %}
+                <script>
+                    function removeMessage(){
+                    const message = document.getElementById('message')
+                    message.remove()
+                }
+                </script>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+{% endmacro %}

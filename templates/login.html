@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="{{url_for('static',filename='css/style.css')}}"
+    />
+    <title>Login</title>
+  </head>
+  <body
+    class="bg-catalina-blue-900 min-h-screen flex justify-center items-center"
+  >
+    <div
+      class="bg-white min-w-1/6 max-w-1/5 rounded-lg pt-8 pl-4 pr-4 pb-8 flex flex-col justify-center items-center"
+    >
+      <h1 class="font-bold text-3xl font-sans mb-4">Login</h1>
+      <div>
+        <form action="" method="post">
+          {{login_form.csrf_token }}
+          <div class="flex flex-col justify-center">
+            <div class="m-4 mb-0">
+              {{login_form.username.label(class="font-extralight
+              text-sm")}} {{login_form.username(class="rounded-md bg-gray-200
+              focus:outline-none focus:border-zinc-600 focus:ring-zinc-600
+              focus:ring-2 w-full h-10 p-2 mt-1 font-extralight text-sm")}}
+            </div>
+            <div class="m-4">
+              {{login_form.password.label(class="font-extralight
+              text-sm")}} {{login_form.password(class="bg-gray-200 rounded-md
+              focus:outline-none focus:border-zinc-600 focus:ring-zinc-600
+              focus:ring-2 w-full h-10 p-2 mt-1 font-extralight text-sm")}}
+            </div>
+            <div class="m-4">
+              <button class="bg-catalina-blue-600
+              hover:bg-catalina-blue-800 text-white font-extralight text-sm
+              rounded-md w-full h-10" type="submit">Login</button>
+            </div>
+            <div class="flex justify-center">
+              {% from 'includes/_formhelpers.html' import render_messages %}
+              {{ render_messages(get_flashed_messages()) }}
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>

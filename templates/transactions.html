@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Transactions{% endblock %}
+{% block content %}
+<div class="h-[692px] overflow-auto">
+    <div class="text-2xl font-semibold m-4">
+      Transactions  
+    </div>
+    <div class="mt-4 p-4">
+      {% if transactions %}
+      <table class="table-fixed w-full">
+        <thead class="text-left text-gray-600 text-sm bg-gray-100">
+          <th class="pl-2 p-4 w-[30rem]">Issued Book Title</th>
+          <th class="pl-2 p-4">Issued By</th>
+          <th class="pl-2 p-4">Issued On</th>
+          <th class="pl-2 p-4">Returned On</th>
+          <th class="pl-2 p-4">Amount Paid</th>
+        </thead>
+        <tbody>
+          {% for transaction in transactions %}
+          <tr
+            class="text-sm font-light text-gray-600 border-t border-b even:bg-gray-100"
+          >
+            <td class="pl-2 p-4">{{transaction.title}}</td>
+            <td class="pl-2 p-4">{{transaction.name}}</td>
+            <td class="pl-2 p-4">{{transaction.issued_on}}</td>
+            <td class="pl-2 p-4">{{transaction.returned_on}}</td>
+            <td class="pl-2 p-4">{{transaction.amount_paid}}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
