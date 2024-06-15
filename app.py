@@ -226,8 +226,7 @@ def edit_book(book_id):
                     'ratings_count': edit_book_form.ratings_count.data,
                     'text_reviews_count': edit_book_form.text_reviews_count.data,
                     'average_rating': edit_book_form.average_rating.data,
-                    'renting_cost':edit_book_form.renting_cost.data,
-                    'modified_date':datetime.now()
+                    'renting_cost':edit_book_form.renting_cost.data
                 },
                 book_id=book_details['book_id']
             )
@@ -297,9 +296,7 @@ def add_member():
             table_name='members',
             data_dict={
                 'name':add_member_form.name.data,
-                'email':add_member_form.email.data,
-                'created_date':datetime.now(),
-                'modified_date':datetime.now()
+                'email':add_member_form.email.data
             }
             )
         if success:
