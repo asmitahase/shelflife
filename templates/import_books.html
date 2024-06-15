@@ -1,7 +1,7 @@
 {% extends 'base.html' %} {% block title %}Import Books{% endblock %} {% block
 content %}
-<div class="p-4 overflow-auto h-[698px]">
-  <div>
+<div class="p-4 overflow-auto h-full">
+  <div class="h-full">
     <h1 class="text-2xl font-semibold mb-8">Import Books</h1>
     {% if books %}
     <form action="" method="post">
@@ -65,6 +65,12 @@ content %}
         })
       })
     </script>
+    {% elif no_books_message %}
+      <div class="w-full flex justify-center items-center h-5/6">
+        <div class="rounded-md bg-gray-100 font-medium text-sm text-zinc-400 border border-gray-300 p-14">
+          {{no_books_message}}
+        </div>
+      </div>
     {% endif %}
   </div>
 </div>

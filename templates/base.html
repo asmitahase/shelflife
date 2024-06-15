@@ -9,9 +9,8 @@
     />
     <title>{% block title %} {% endblock %}</title>
   </head>
-  <body class="bg-gray-300 min-h-screen">
-    <div
-      class="bg-catalina-blue-800 h-14 flex flex-row justify-between items-center pl-4 pr-4 text-zinc-50"
+  <body class="bg-gray-300 h-screen flex flex-col">
+    <div class="bg-catalina-blue-800 basis-1/12 flex flex-row justify-between items-center pl-4 pr-4 text-zinc-50"
     >
       <div class="font-bold text-lg">Shelf Life</div>
       <div class="flex flex-row gap-x-16 items-center">
@@ -39,6 +38,6 @@
       </div>
       <div><a href="{{url_for('logout')}}">Logout</a></div>
     </div>
-    <div class="bg-zinc-50 rounded-md m-2 p-2 h-fit">{% block content %}{% endblock %}</div>
+    <div class="bg-zinc-50 rounded-md m-2 p-2 basis-11/12">{% block content %}{% endblock %}</div>
   </body>
 </html>

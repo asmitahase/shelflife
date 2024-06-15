@@ -10,9 +10,10 @@ from db_functions import add_new_record, get_all_records, get_record, edit_recor
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'mysecretkey1'
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'WordPass'
+app.config['MYSQL_HOST'] = 'library.cd460mkcovh4.ap-south-1.rds.amazonaws.com'
+app.config['MYSQL_USER'] = 'libadmin'
+app.config['MYSQL_PASSWORD'] = 'nWsqt9Mq4EgeNj6'
+app.config['MYSQL_PORT'] = 3306
 app.config['MYSQL_DB'] = 'library'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
@@ -93,8 +94,12 @@ def books():
         issue_book_form.member_id.choices.insert(0,('',''))
         return render_template('books.html',books=books,issue_book_form=issue_book_form,search=search_string)
     else:
-        flash("Books not found",'error')
-        return render_template('books.html',search=search_string)
+        if search_string:
+            no_books_message = "No books were found for that search string."
+        else:
+            no_books_message = "There are no books added yet. Add or import new books to show up here."
+        return render_template('books.html',search=search_string,no_books_message=no_books_message) 
+
 
 @app.route('/addbook', methods=['GET', 'POST'])
 @login_required
@@ -142,34 +147,37 @@ def search_to_import():
 def import_books(): 
     params_for_api = pick_valid_pairs_from_dict(request.args,('title','authors','isbn','publisher'))
     books = fetch_books_from_api(params_for_api)
-    csrf_form = CSRFForm()
-    if request.method=='POST' and csrf_form.validate_on_submit():
-        books_to_import = [ book for book in books if book['isbn'] in request.form ]
-        for book in books_to_import:       
-            success, error = add_new_record(
-                connection=mysql.connection,
-                table_name='books',
-                data_dict={'title':book["title"],
-                        'authors':book["authors"],
-                        'isbn':book["isbn"],
-                        'isbn13':book["isbn13"],
-                        'language_code':book["language_code"],
-                        'num_of_pages':book["  num_pages"],
-                        'publisher':book["publisher"],
-                        'publication_date':datetime.strptime(book["publication_date"],'%m/%d/%Y'),
-                        'total_count':request.form.get(book["isbn"]),
-                        'available_count': request.form.get(book["isbn"]), #available count is same as total count when the book is newly added
-                        'ratings_count':book["ratings_count"],
-                        'text_reviews_count':book["text_reviews_count"],
-                        'average_rating':book["average_rating"]
-                        })
-        if success:
-            flash('The books were successfully imported','success')
-        else:
-            flash(f'Import could not be performed, following error occured {error}','error')
-        return redirect(url_for('books'))
-    return render_template('import_books.html', books=books, csrf_form=csrf_form)
-        
+    if books:
+        csrf_form = CSRFForm()
+        if request.method=='POST' and csrf_form.validate_on_submit():
+            books_to_import = [ book for book in books if book['isbn'] in request.form ]
+            for book in books_to_import:       
+                success, error = add_new_record(
+                    connection=mysql.connection,
+                    table_name='books',
+                    data_dict={'title':book["title"],
+                            'authors':book["authors"],
+                            'isbn':book["isbn"],
+                            'isbn13':book["isbn13"],
+                            'language_code':book["language_code"],
+                            'num_of_pages':book["  num_pages"],
+                            'publisher':book["publisher"],
+                            'publication_date':datetime.strptime(book["publication_date"],'%m/%d/%Y'),
+                            'total_count':request.form.get(book["isbn"]),
+                            'available_count': request.form.get(book["isbn"]), #available count is same as total count when the book is newly added
+                            'ratings_count':book["ratings_count"],
+                            'text_reviews_count':book["text_reviews_count"],
+                            'average_rating':book["average_rating"]
+                            })
+            if success:
+                flash('The books were successfully imported','success')
+            else:
+                flash(f'Import could not be performed, following error occured {error}','error')
+            return redirect(url_for('books'))
+        return render_template('import_books.html', books=books, csrf_form=csrf_form)
+    else:
+        no_books_message = "No books were found for that search."
+        return render_template('import_books.html',no_books_message=no_books_message)
 @app.route('/view_book_details/<string:book_id>', methods=['GET'])
 @login_required
 def view_book_details(book_id):
@@ -269,12 +277,15 @@ def members():
             created_date='DESC',
             name='ASC'
         )
-    if member_count > 0:
+    if member_count:
         delete_member_form = DeleteForm()
         return render_template('members.html',members=members, delete_member_form=delete_member_form,search=search_string)
     else:
-        flash('No Members found','error')
-        return render_template('members.html',search=search_string)
+        if search_string:
+            no_members_message = "No members were found for that search."
+        else:
+            no_members_message = "There are no members added yet. Add new members to show up here."
+        return render_template('members.html',search=search_string,no_members_message=no_members_message)
 
 @app.route('/add_member',methods=['GET','POST'])
 @login_required
