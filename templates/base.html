@@ -10,16 +10,13 @@
     <title>{% block title %} {% endblock %}</title>
   </head>
   <body class="bg-gray-300 h-svh flex flex-col">
-    <div class="bg-catalina-blue-800 basis-1/12 flex flex-row shrink-0 min-h-12 justify-between items-center pl-4 pr-4 text-zinc-50"
+    <div
+      class="bg-catalina-blue-800 basis-1/12 flex flex-row shrink-0 min-h-12 justify-between items-center pl-4 pr-4 text-zinc-50"
     >
-      <div class="font-bold text-lg">Shelf Life</div>
-      <div class="flex flex-row gap-x-16 items-center">
+      <div class="font-semibold text-lg">Shelf Life</div>
+      <div class="flex flex-row gap-x-20 items-center font-medium text-base">
         <div class="">
-          <a
-            href="{{url_for('books')}}"
-            class="hover:text-zinc-400"
-            >Books</a
-          >
+          <a href="{{url_for('books')}}" class="hover:text-zinc-400">Books</a>
         </div>
         <div class="">
           <a
@@ -29,15 +26,15 @@
           >
         </div>
         <div class="">
-          <a
-            class="hover:text-zinc-950"
-            href="{{url_for('transactions')}}"
+          <a class="hover:text-zinc-950" href="{{url_for('transactions')}}"
             >Transactions</a
           >
         </div>
       </div>
-      <div><a href="{{url_for('logout')}}">Logout</a></div>
+      <div class="text-xs"><a href="{{url_for('logout')}}">Logout</a></div>
     </div>
-    <div class="bg-zinc-50 rounded-md m-2 p-2 basis-11/12 overflow-auto">{% block content %}{% endblock %}</div>
+    <div class="bg-zinc-50 rounded-md m-2 p-2 basis-11/12 overflow-auto">
+      {% block content %}{% endblock %}
+    </div>
   </body>
 </html>

@@ -2,15 +2,15 @@
     %}
     <div class="h-full">
       <div class="flex flex-row justify-between p-4">
-        <form action="" method="get" class="flex flex-row justify-between items-center w-4/6 border border-zinc-300 shadow-sm rounded-md font-extralight h-8 p-1 pr-0 bg-white">
+        <form action="" method="get" class="flex flex-row justify-between items-center w-4/6 border border-zinc-300 shadow-sm rounded-md font-medium h-8 p-1 pr-0 bg-white">
           <input
-          class="h-7 w-full border-0 text-sm focus:outline-none p-2 mr-1"
+          class="h-7 w-full border-0 text-xs text-gray-600 focus:outline-none p-2 mr-1 placeholder:text-xs"
           placeholder="Search for a member"
           id="search-box"
           name="search"
           value="{%if search%}{{search}}{% endif %}"
         />
-        <button type="submit" class="shadow-md text-xs text-zinc-950 bg-gray-50 border border-gray-400 hover:drop-shadow-lg hover:shadow-inner rounded-md w-16 h-8 hidden" id="search-btn">Search</button>
+        <button type="submit" class="shadow-md text-xs text-gray-600 bg-gray-50 border border-gray-400 hover:drop-shadow-lg hover:shadow-inner rounded-md w-16 h-8 hidden" id="search-btn">Search</button>
         </form>
       <script>
         const searchButton = document.querySelector('#search-btn') 
@@ -22,7 +22,7 @@
         <a class="w-1/12 h-8" href="{{url_for('add_member')}}">
             <!-- TODO add ring on hover to the buttons -->
             <button
-            class="bg-catalina-blue-600 hover:bg-catalina-blue-800 text-white font-extralight text-sm rounded-md h-full w-full"
+            class="bg-catalina-blue-600 hover:bg-catalina-blue-800 text-white font-medium text-sm rounded-md h-full w-full"
             >
             Add Member
             </button>
@@ -46,7 +46,7 @@
             <tbody>
               {% for member in members %}
               <tr
-                class="text-sm font-light text-gray-600 border-t border-b even:bg-gray-100"
+                class="text-sm font-medium text-gray-500 border-t border-b even:bg-gray-100"
               >
                 <td class="pl-2 p-4">{{member.name}}</td>
                 <td class="pl-2 p-4">{{member.email}}</td>
@@ -56,19 +56,19 @@
                   <a href="{{url_for('return_book',member_id=member.member_id)}}">
                 <!-- TODO disable return button if the rented count is 0 -->
                     <button
-                    class="shadow-md text-xs text-zinc-950 bg-gray-50 border border-gray-400 hover:drop-shadow-lg hover:shadow-inner rounded-md w-16 h-7"
+                    class="shadow-md text-xs text-gray-600 bg-gray-50 border border-gray-400 hover:drop-shadow-lg hover:shadow-inner rounded-md w-16 h-7"
                     type="button">Return
                   </button>
                   </a>
                   <a href="{{url_for('edit_member',member_email=member.email)}}"><button
-                    class="shadow-md text-xs text-zinc-950 bg-gray-50 border border-gray-400 hover:drop-shadow-lg hover:shadow-inner rounded-md w-16 h-7"
+                    class="shadow-md text-xs text-gray-600 bg-gray-50 border border-gray-400 hover:drop-shadow-lg hover:shadow-inner rounded-md w-16 h-7"
                     type="button"
                   >
                     Edit
                   </button>
                 </a> 
                   <button
-                    class="shadow-md text-xs text-zinc-950 bg-gray-50 border border-gray-400 hover:drop-shadow-lg hover:shadow-inner rounded-md w-16 h-7"
+                    class="shadow-md text-xs text-gray-600 bg-gray-50 border border-gray-400 hover:drop-shadow-lg hover:shadow-inner rounded-md w-16 h-7"
                     type="button"
                     onclick="openDeleteModal(event.target.value)"
                     value="{{member.email}}"
@@ -82,12 +82,12 @@
           </table>
           <dialog class="w-72 h-36 rounded-md shadow-lg">
             <div class="p-6 h-full flex flex-col justify-between">
-              <div class="font-semibold text-zinc-700 flex justify-center text-lg">Delete this Member?</div>
+              <div class="font-semibold text-gray-700 flex justify-center text-lg">Delete this Member?</div>
               <form action="{{url_for('delete_member')}}" method="post">
                 {{delete_member_form.id()}}
                 {{delete_member_form.csrf_token()}}
-                <button type="button" id="close-btn" class="float-left bg-white border border-catalina-blue-600 rounded-md text-sm text-catalina-blue-600 font-extralight hover:bg-gray-200 w-24 h-8">Cancel</button>
-                <button type="submit" class="float-right bg-catalina-blue-600 hover:bg-catalina-blue-800 text-white font-extralight text-sm rounded-md w-24 h-8">Delete</button>
+                <button type="button" id="close-btn" class="float-left bg-white border border-catalina-blue-600 rounded-md text-sm text-catalina-blue-600 font-medium hover:bg-gray-200 w-24 h-8">Cancel</button>
+                <button type="submit" class="float-right bg-catalina-blue-600 hover:bg-catalina-blue-800 text-white font-medium text-sm rounded-md w-24 h-8">Delete</button>
               </form> 
             </div>
           </dialog>

@@ -5,72 +5,86 @@ content %}
     <h1 class="text-2xl font-semibold mb-8">Import Books</h1>
     {% if books %}
     <form action="" method="post">
-      {{csrf_form.csrf_token()}}  
-    <table class="table-auto w-full">
-      <thead class="text-left text-gray-600 text-sm bg-gray-100">
-        <th class="pl-2 p-4">Title</th>
-        <th class="pl-2 p-4">Author(s)</th>
-        <th class="pl-2 p-4">Publisher</th>
-        <th class="pl-2 p-4">ISBN</th>
-        <th class="pl-2 p-4 w-32">Select Book</th>
-      </thead>
-      <tbody>
-        {% for book in books %}
-        <tr
-          class="group text-sm font-light text-gray-600 border-t border-b even:bg-gray-100"
-        >
+      {{csrf_form.csrf_token()}}
+      <table class="table-auto w-full">
+        <thead class="text-left text-gray-600 text-sm bg-gray-100">
+          <th class="pl-2 p-4">Title</th>
+          <th class="pl-2 p-4">Author(s)</th>
+          <th class="pl-2 p-4">Publisher</th>
+          <th class="pl-2 p-4">ISBN</th>
+          <th class="pl-2 p-4 w-32">Select Book</th>
+        </thead>
+        <tbody>
+          {% for book in books %}
+          <tr
+            class="group text-sm font-medium text-gray-600 border-t border-b even:bg-gray-100"
+          >
             <td class="pl-2 p-4">{{book["title"]}}</td>
             <td class="pl-2 p-4">{{book["authors"]}}</td>
             <td class="pl-2 p-4">{{book["publisher"]}}</td>
             <td class="pl-2 p-4">{{book["isbn"]}}</td>
             <td class="pl-2 p-4 flex flex-row justify-end items-center gap-x-4">
               <input
-                class="p-2 rounded-md bg-gray-200 focus:outline-none focus:border-zinc-600 focus:ring-zinc-600 focus:ring-2 w-10 h-6 text-sm font-extralight hidden"
+                class="p-2 rounded-md bg-gray-200 focus:outline-none focus:border-zinc-600 focus:ring-zinc-600 focus:ring-2 w-10 h-6 text-sm font-medium hidden"
                 type="number"
               />
-              <input type="checkbox" value="{{book['isbn']}}" class="accent-catalina-blue-600 w-5 h-5 mr-6">
+              <input
+                type="checkbox"
+                value="{{book['isbn']}}"
+                class="accent-catalina-blue-600 w-5 h-5 mr-6"
+              />
             </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    <div class="mt-8">
-      <a href="{{url_for('books')}}"
-        ><button
-          type="button"
-          class="bg-white border border-catalina-blue-600 text-catalina-blue-600 rounded-md text-sm font-extralight hover:bg-gray-300 w-24 h-9 ml-2 float-left">
-          Cancel
-        </button></a>
-      <button
-        id="import-btn"
-        type="submit"
-        class="bg-catalina-blue-600 hover:bg-catalina-blue-800 text-white font-extralight text-sm rounded-md w-24 h-9 mr-2 float-right disabled:bg-gray-200 disabled:border disabled:border-gray-400 disabled:text-gray-500"
-        disabled
-      >
-        Import
-      </button>
-    </div>
-  </form>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <div class="mt-8">
+        <a href="{{url_for('books')}}"
+          ><button
+            type="button"
+            class="bg-white border border-catalina-blue-600 text-catalina-blue-600 rounded-md text-sm font-medium hover:bg-gray-300 w-24 h-9 ml-2 float-left"
+          >
+            Cancel
+          </button></a
+        >
+        <button
+          id="import-btn"
+          type="submit"
+          class="bg-catalina-blue-600 hover:bg-catalina-blue-800 text-white font-medium text-sm rounded-md w-24 h-9 mr-2 float-right disabled:bg-gray-200 disabled:border disabled:border-gray-400 disabled:text-gray-500"
+          disabled
+        >
+          Import
+        </button>
+      </div>
+    </form>
     <script>
-      const checkboxes = document.querySelectorAll("input[type='checkbox']")
-      const importButton = document.querySelector('#import-btn')
-      checkboxes.forEach(checkbox=>{
-        checkbox.addEventListener('click',()=>{
-            const isChecked = checkbox.checked
-            const inputBookCount = checkbox.previousElementSibling 
-            inputBookCount.classList.toggle('hidden',!isChecked)
-            isChecked ? inputBookCount.setAttribute('name',checkbox.value):inputBookCount.removeAttribute('name') 
-            const anyBookSelected = [...checkboxes].some((checkbox)=>checkbox.checked)
-            anyBookSelected ? importButton.removeAttribute('disabled') : importButton.setAttribute('disabled','')
-        })
-      })
+      const checkboxes = document.querySelectorAll("input[type='checkbox']");
+      const importButton = document.querySelector("#import-btn");
+      checkboxes.forEach((checkbox) => {
+        checkbox.addEventListener("click", () => {
+          const isChecked = checkbox.checked;
+          const inputBookCount = checkbox.previousElementSibling;
+          inputBookCount.classList.toggle("hidden", !isChecked);
+          isChecked
+            ? inputBookCount.setAttribute("name", checkbox.value)
+            : inputBookCount.removeAttribute("name");
+          const anyBookSelected = [...checkboxes].some(
+            (checkbox) => checkbox.checked
+          );
+          anyBookSelected
+            ? importButton.removeAttribute("disabled")
+            : importButton.setAttribute("disabled", "");
+        });
+      });
     </script>
     {% elif no_books_message %}
-      <div class="w-full flex justify-center items-center h-5/6">
-        <div class="rounded-md bg-gray-100 font-medium text-sm text-zinc-400 border border-gray-300 p-14">
-          {{no_books_message}}
-        </div>
+    <div class="w-full flex justify-center items-center h-5/6">
+      <div
+        class="rounded-md bg-gray-100 font-medium text-sm text-zinc-400 border border-gray-300 p-14"
+      >
+        {{no_books_message}}
       </div>
+    </div>
     {% endif %}
   </div>
 </div>
