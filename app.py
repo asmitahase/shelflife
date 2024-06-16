@@ -10,10 +10,10 @@ from db_functions import add_new_record, get_all_records, get_record, edit_recor
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'mysecretkey1'
-app.config['MYSQL_HOST'] = 'library.cd460mkcovh4.ap-south-1.rds.amazonaws.com'
-app.config['MYSQL_USER'] = 'libadmin'
-app.config['MYSQL_PASSWORD'] = 'nWsqt9Mq4EgeNj6'
-app.config['MYSQL_PORT'] = 3306
+app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = 'WordPass'
+# app.config['MYSQL_PORT'] = 3306
 app.config['MYSQL_DB'] = 'library'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
@@ -319,7 +319,7 @@ def edit_member(member_email):
             member_id=member_details['member_id']
         )
         if success:
-            flash("Member details edited successfully", success)
+            flash("Member details edited successfully", 'success')
             return redirect(url_for('members'))
         else:
             flash(f"Member details could not be edited, following error occured {error}","error")    
@@ -337,7 +337,7 @@ def delete_member():
             email=delete_member_form.id.data
         )
         if success:
-            flash("Member deleted successfully","error")
+            flash("Member deleted successfully",'success')
         else:
             flash(f"Member could not be deleted, following error occured {error}","error")
         return redirect(url_for('members'))

@@ -1,6 +1,6 @@
 {% extends 'base.html' %} {% block title %}Members{% endblock %} {% block content
     %}
-    <div class="h-full overflow-auto">
+    <div class="h-full">
       <div class="flex flex-row justify-between p-4">
         <form action="" method="get" class="flex flex-row justify-between items-center w-4/6 border border-zinc-300 shadow-sm rounded-md font-extralight h-8 p-1 pr-0 bg-white">
           <input
@@ -34,7 +34,7 @@
             {{ render_messages(get_flashed_messages()) }}
           </div>
           {% if members %}
-          <div class="p-4"></div>
+          <div class="p-4">
           <table class="table-fixed w-full">
             <thead class="text-left text-gray-600 text-sm bg-gray-100">
               <th class="pl-2 p-4">Name</th>
