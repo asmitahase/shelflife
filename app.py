@@ -6,15 +6,16 @@ from functools import wraps
 from forms import LoginForm, AddBookForm, SearchBooksForm, DeleteForm, AddMemberForm, IssueBookForm, ReturnBookForm, CSRFForm, ImportBooksForm
 from helpers import authenticate_user, fetch_books_from_api, pick_valid_pairs_from_dict, prefill_form_values,get_new_available_count,set_total_renting_cost_per_book,get_total_renting_cost_per_member
 from db_functions import add_new_record, get_all_records, get_record, edit_record, delete_record, search_string_in_table
+import app_secrets
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'mysecretkey1'
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'WordPass'
-# app.config['MYSQL_PORT'] = 3306
-app.config['MYSQL_DB'] = 'library'
+app.config['SECRET_KEY'] = app_secrets.FLASK_SECRET_KEY
+app.config['MYSQL_HOST'] = app_secrets.MYSQL_HOST
+app.config['MYSQL_USER'] = app_secrets.MYSQL_USER
+app.config['MYSQL_PASSWORD'] = app_secrets.MYSQL_PASSWORD
+# app.config['MYSQL_PORT'] = app_secrets.MYSQL_PORT
+app.config['MYSQL_DB'] = app_secrets.MYSQL_DB
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
 scheduler = APScheduler()
