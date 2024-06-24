@@ -2,7 +2,7 @@
 content %}
 <div class="p-4 overflow-auto h-full">
   <div class="h-full">
-    <h1 class="text-2xl font-semibold mb-8">Import Books</h1>
+    <h1 class="text-2xl font-semibold mb-8 text-zinc-700">Import Books</h1>
     {% if books %}
     <form action="" method="post">
       {{csrf_form.csrf_token()}}
@@ -17,22 +17,32 @@ content %}
         <tbody>
           {% for book in books %}
           <tr
-            class="group text-sm font-medium text-gray-600 border-t border-b even:bg-gray-100"
+            class="group text-sm font-medium text-gray-500 border-t border-b even:bg-gray-100"
           >
             <td class="pl-2 p-4">{{book["title"]}}</td>
             <td class="pl-2 p-4">{{book["authors"]}}</td>
             <td class="pl-2 p-4">{{book["publisher"]}}</td>
             <td class="pl-2 p-4">{{book["isbn"]}}</td>
-            <td class="pl-2 p-4 flex flex-row justify-end items-center gap-x-4">
-              <input
-                class="p-2 rounded-md bg-gray-200 focus:outline-none focus:border-zinc-600 focus:ring-zinc-600 focus:ring-2 w-10 h-6 text-sm font-medium hidden"
+            <td class="pl-2 p-4">
+              <div class="flex flex-row justify-end items-center gap-x-4">
+                <div class="flex flex-col justify-center items-center gap-y-1 hidden">
+                  <input
+                placeholder="Count"
+                class="p-2 rounded-md bg-gray-200 focus:outline-none focus:border-zinc-600 focus:ring-zinc-600 focus:ring-2 w-16 h-6 text-sm font-medium placeholder:text-xs placeholder:text-gray-500 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 type="number"
-              />
+                  />
+                  <input
+                placeholder="Rent"
+                class="p-2 rounded-md bg-gray-200 focus:outline-none focus:border-zinc-600 focus:ring-zinc-600 focus:ring-2 w-16 h-6 text-sm font-medium placeholder:text-xs placeholder:text-gray-500 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                type="number"
+                  />
+                </div>
               <input
                 type="checkbox"
                 value="{{book['isbn']}}"
-                class="accent-catalina-blue-600 w-5 h-5 mr-6"
+                class="accent-catalina-blue-600 w-5 h-5"
               />
+              </div>
             </td>
           </tr>
           {% endfor %}
@@ -63,11 +73,17 @@ content %}
       checkboxes.forEach((checkbox) => {
         checkbox.addEventListener("click", () => {
           const isChecked = checkbox.checked;
-          const inputBookCount = checkbox.previousElementSibling;
-          inputBookCount.classList.toggle("hidden", !isChecked);
-          isChecked
-            ? inputBookCount.setAttribute("name", checkbox.value)
-            : inputBookCount.removeAttribute("name");
+          const inputDiv = checkbox.previousElementSibling;
+          const inputBookCount = inputDiv.firstElementChild;
+          const inputRentingCost = inputDiv.lastElementChild;
+          inputDiv.classList.toggle("hidden", !isChecked);
+          if(isChecked){
+              inputBookCount.setAttribute("name", `${checkbox.value}_count`)
+              inputRentingCost.setAttribute("name",`${checkbox.value}_rent`)
+          }else{
+            inputBookCount.removeAttribute("name")
+            inputRentingCost.removeAttribute("name")
+          }
           const anyBookSelected = [...checkboxes].some(
             (checkbox) => checkbox.checked
           );

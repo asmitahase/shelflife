@@ -3,7 +3,7 @@
 {% block content %}
     <div class="p-4 flex flex-col items-center overflow-auto h-full">
         <div class="w-1/2">
-            <h1 class="text-2xl font-semibold mb-4 ml-4">Edit book details</h1>
+            <h1 class="text-2xl font-semibold mb-4 ml-4 text-zinc-700">Edit book details</h1>
             <div class="flex justify-center" id="message">
                 {% from 'includes/_formhelpers.html' import render_messages %}
                 {{ render_messages(get_flashed_messages()) }}

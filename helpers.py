@@ -45,3 +45,13 @@ def get_total_renting_cost_per_member(members):
         cost_per_member[member['member_id']] = member.get('total_renting_cost')+ cost_per_member.get(member['member_id'],0)
     return cost_per_member
 
+def transform_form_data(form_data):
+    result = {}
+    for key,value in form_data.items():
+        if key!='csrf_token':
+            isbn,field = key.split('_')
+            if result.get(isbn):
+                result[isbn][field] = value
+            else:
+                result[isbn] = {field:value}
+    return result

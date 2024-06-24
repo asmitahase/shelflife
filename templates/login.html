@@ -15,22 +15,22 @@
     <div
       class="bg-white min-w-1/6 max-w-1/5 rounded-lg pt-8 pl-4 pr-4 pb-8 flex flex-col justify-center items-center"
     >
-      <h1 class="font-bold text-3xl font-sans mb-4">Login</h1>
+      <h1 class="font-bold text-3xl font-sans mb-4 text-zinc-700">ShelfLife</h1>
       <div>
         <form action="" method="post">
           {{login_form.csrf_token }}
-          <div class="flex flex-col justify-center">
+          <div class="flex flex-col justify-center text-gray-500">
             <div class="m-4 mb-0">
               {{login_form.username.label(class="font-medium text-sm")}}
               {{login_form.username(class="rounded-md bg-gray-200
               focus:outline-none focus:border-zinc-600 focus:ring-zinc-600
-              focus:ring-2 w-full h-10 p-2 mt-1 font-medium text-sm")}}
+              focus:ring-2 w-full h-10 p-2 mt-1 font-medium text-sm text-gray-600")}}
             </div>
             <div class="m-4">
               {{login_form.password.label(class="font-medium text-sm")}}
               {{login_form.password(class="bg-gray-200 rounded-md
               focus:outline-none focus:border-zinc-600 focus:ring-zinc-600
-              focus:ring-2 w-full h-10 p-2 mt-1 font-medium text-sm")}}
+              focus:ring-2 w-full h-10 p-2 mt-1 font-medium text-sm text-gray-600")}}
             </div>
             <div class="m-4">
               <button

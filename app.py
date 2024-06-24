@@ -4,7 +4,7 @@ from flask_apscheduler import APScheduler
 from datetime import datetime
 from functools import wraps
 from forms import LoginForm, AddBookForm, SearchBooksForm, DeleteForm, AddMemberForm, IssueBookForm, ReturnBookForm, CSRFForm, ImportBooksForm
-from helpers import authenticate_user, fetch_books_from_api, pick_valid_pairs_from_dict, prefill_form_values,get_new_available_count,set_total_renting_cost_per_book,get_total_renting_cost_per_member
+from helpers import authenticate_user, fetch_books_from_api, pick_valid_pairs_from_dict, prefill_form_values,get_new_available_count,set_total_renting_cost_per_book,get_total_renting_cost_per_member, transform_form_data
 from db_functions import add_new_record, get_all_records, get_record, edit_record, delete_record, search_string_in_table
 import app_secrets
 
@@ -145,14 +145,15 @@ def search_to_import():
 
 @app.route('/import_books',methods=['GET','POST'])
 @login_required
-def import_books(): 
+def import_books():
     params_for_api = pick_valid_pairs_from_dict(request.args,('title','authors','isbn','publisher'))
     books = fetch_books_from_api(params_for_api)
     if books:
         csrf_form = CSRFForm()
         if request.method=='POST' and csrf_form.validate_on_submit():
-            books_to_import = [ book for book in books if book['isbn'] in request.form ]
-            for book in books_to_import:       
+            form_data = transform_form_data(request.form)
+            books_to_import = [ book for book in books if book['isbn'] in form_data ]
+            for book in books_to_import:     
                 success, error = add_new_record(
                     connection=mysql.connection,
                     table_name='books',
@@ -164,11 +165,12 @@ def import_books():
                             'num_of_pages':book["  num_pages"],
                             'publisher':book["publisher"],
                             'publication_date':datetime.strptime(book["publication_date"],'%m/%d/%Y'),
-                            'total_count':request.form.get(book["isbn"]),
-                            'available_count': request.form.get(book["isbn"]), #available count is same as total count when the book is newly added
+                            'total_count':form_data.get(book["isbn"]).get('count'),
+                            'available_count': form_data.get(book["isbn"]).get('count'), #available count is same as total count when the book is newly added
                             'ratings_count':book["ratings_count"],
                             'text_reviews_count':book["text_reviews_count"],
-                            'average_rating':book["average_rating"]
+                            'average_rating':book["average_rating"],
+                            'renting_cost':form_data.get(book["isbn"]).get('rent')
                             })
             if success:
                 flash('The books were successfully imported','success')
