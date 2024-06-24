@@ -372,7 +372,7 @@ def issue_book():
             cur.close()
             flash("Book was issued","success")
         else:
-            flash("Member's outstanding_debt is more than 500","error")
+            flash("Member's outstanding debt is more than 500","error")
         return redirect(url_for('books'))
     
 
@@ -383,28 +383,32 @@ def return_book(member_id):
     cur = mysql.connection.cursor()
     count = cur.execute("SELECT books.book_id,books.title,books.renting_cost,transactions.issued_on FROM transactions INNER JOIN books ON transactions.book_id=books.book_id WHERE member_id=%s AND transactions.returned_on IS NULL",[member_id])
     books_issued_by_member = cur.fetchall()
-    books_issued_by_member = set_total_renting_cost_per_book(books_issued_by_member)  
-    return_book_form.return_book.choices = [ (book['book_id'],book['title']) for book in books_issued_by_member ]
-    if request.method =='POST' and return_book_form.validate_on_submit():
-        for book_id in return_book_form.return_book.data:
-            #update transactions table with returned_on date and amount paid where bookid
-            total_renting_cost = [ book.get('total_renting_cost') for book in books_issued_by_member if book['book_id']==book_id][0]
-            cur.execute("UPDATE transactions SET returned_on=%s,amount_paid=%s WHERE book_id=%s AND member_id=%s",[
-                datetime.now(),
-                total_renting_cost,
-                book_id,
-                member_id
-            ])
-            #update books table with available and rented count where book_id
-            cur.execute("UPDATE books SET available_count=available_count+1,rented_count=rented_count-1 WHERE book_id=%s",[book_id])
+    if books_issued_by_member:
+        books_issued_by_member = set_total_renting_cost_per_book(books_issued_by_member)  
+        return_book_form.return_book.choices = [ (book['book_id'],book['title']) for book in books_issued_by_member ]
+        if request.method =='POST' and return_book_form.validate_on_submit():
+            for book_id in return_book_form.return_book.data:
+                #update transactions table with returned_on date and amount paid where bookid
+                total_renting_cost = [ book.get('total_renting_cost') for book in books_issued_by_member if book['book_id']==book_id][0]
+                cur.execute("UPDATE transactions SET returned_on=%s,amount_paid=%s WHERE book_id=%s AND member_id=%s",[
+                    datetime.now(),
+                    total_renting_cost,
+                    book_id,
+                    member_id
+                ])
+                #update books table with available and rented count where book_id
+                cur.execute("UPDATE books SET available_count=available_count+1,rented_count=rented_count-1 WHERE book_id=%s",[book_id])
 
-        #update memebers with outstanding debt where member_id
-        cur.execute("UPDATE members SET outstanding_debt=outstanding_debt-%s WHERE member_id=%s",[return_book_form.total_amount_paid.data,member_id])
-        mysql.connection.commit()
+            #update memebers with outstanding debt where member_id
+            cur.execute("UPDATE members SET outstanding_debt=outstanding_debt-%s WHERE member_id=%s",[return_book_form.total_amount_paid.data,member_id])
+            mysql.connection.commit()
+            cur.close()
+            return redirect(url_for('members'))
         cur.close()
+        return render_template('return_book.html',return_book_form=return_book_form,books=books_issued_by_member)
+    else:
+        flash("This member has no issued books",'error')
         return redirect(url_for('members'))
-    cur.close()
-    return render_template('return_book.html',return_book_form=return_book_form,books=books_issued_by_member)
 
 
 
