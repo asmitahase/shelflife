@@ -3,45 +3,44 @@ from flask_mysqldb import MySQL
 from flask_apscheduler import APScheduler
 from datetime import datetime
 from functools import wraps
-from forms import LoginForm, AddBookForm, SearchBooksForm, DeleteForm, AddMemberForm, IssueBookForm, ReturnBookForm, CSRFForm, ImportBooksForm
-from helpers import authenticate_user, fetch_books_from_api, pick_valid_pairs_from_dict, prefill_form_values,get_new_available_count,set_total_renting_cost_per_book,get_total_renting_cost_per_member, transform_form_data
-from db_functions import add_new_record, get_all_records, get_record, edit_record, delete_record, search_string_in_table
+from forms import LoginForm, AddBookForm, SearchBooksForm, DeleteForm, AddMemberForm, IssueBookForm, ReturnBookForm, CSRFForm
+from helpers import authenticate_user, fetch_books_from_api, pick_valid_pairs_from_dict, prefill_form_values,get_new_available_count,cal_total_renting_cost_per_member,calculate_renting_cost_for_books, transform_form_data
+from db_functions import add_new_record, get_all_records, get_record, edit_record, delete_record, search_string_in_table, get_rented_book_data, get_completed_transactions, update_book_count, get_books_issued_by_member, reduce_outstanding_debt
 import app_secrets
 
-
+#app config
 app = Flask(__name__)
 app.config['SECRET_KEY'] = app_secrets.FLASK_SECRET_KEY
 app.config['MYSQL_HOST'] = app_secrets.MYSQL_HOST
 app.config['MYSQL_USER'] = app_secrets.MYSQL_USER
 app.config['MYSQL_PASSWORD'] = app_secrets.MYSQL_PASSWORD
-# app.config['MYSQL_PORT'] = app_secrets.MYSQL_PORT
+app.config['MYSQL_PORT'] = app_secrets.MYSQL_PORT
 app.config['MYSQL_DB'] = app_secrets.MYSQL_DB
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
-
+#scheduler config 
 scheduler = APScheduler()
 scheduler.api_enabled = True
 scheduler.init_app(app)
-
 mysql = MySQL(app)
-
-@scheduler.task('interval',id='update_outstanding_debt',seconds=14400)
+#scheduler to update outstanding debt, becuase it increases with the number of days the books are rented for
+@scheduler.task('interval',id='update_outstanding_debt',seconds=100000)
 def update_oustanding_debt():
     print("scheduler started")
     with scheduler.app.app_context():
         #Get data to calculate outstanding debt of members
-        cur = mysql.connection.cursor()
-        cur.execute("SELECT books.book_id,books.renting_cost,transactions.issued_on,transactions.returned_on,members.member_id FROM books INNER JOIN transactions ON books.book_id=transactions.book_id INNER JOIN members ON transactions.member_id=members.member_id WHERE transactions.returned_on IS NULL")
-        transactions = cur.fetchall()
-
+        rented_books = get_rented_book_data(mysql.connection)
         #calculate outstanding debt
-        transactions = set_total_renting_cost_per_book(transactions)
-        cost_per_member = get_total_renting_cost_per_member(transactions)
-
-        #update members with the lastest oustading debt
+        cost_per_member = cal_total_renting_cost_per_member(rented_books)
+        #update members with the latest outstanding debt
         for member_id in cost_per_member:
-            cur.execute("UPDATE members SET outstanding_debt=%s WHERE member_id=%s",[cost_per_member.get(member_id),member_id])
-        mysql.connection.commit()
-        cur.close()
+            success,error = edit_record(
+                connection=mysql.connection,
+                table_name='members',
+                data_dict={'outstanding_debt':cost_per_member.get(member_id)},
+                member_id=member_id
+            )
+            if error:
+                print(error)
 
 def login_required(f):
     @wraps(f)
@@ -90,6 +89,7 @@ def books():
         )
     if books_count:
         issue_book_form = IssueBookForm()
+        #populate issue book form with member details
         _,members = get_all_records(connection=mysql.connection,table_name='members',columns=('member_id','name'),name='ASC')
         issue_book_form.member_id.choices = [(member['member_id'],member['name']) for member in members]
         issue_book_form.member_id.choices.insert(0,('',''))
@@ -100,7 +100,6 @@ def books():
         else:
             no_books_message = "There are no books added yet. Add or import new books to show up here."
         return render_template('books.html',search=search_string,no_books_message=no_books_message) 
-
 
 @app.route('/addbook', methods=['GET', 'POST'])
 @login_required
@@ -146,13 +145,16 @@ def search_to_import():
 @app.route('/import_books',methods=['GET','POST'])
 @login_required
 def import_books():
-    params_for_api = pick_valid_pairs_from_dict(request.args,('title','authors','isbn','publisher'))
-    books = fetch_books_from_api(params_for_api)
+    #get full details from frappe api for each book
+    books = fetch_books_from_api(request.args)
     if books:
         csrf_form = CSRFForm()
         if request.method=='POST' and csrf_form.validate_on_submit():
+            #get count and renting_cost of each book
             form_data = transform_form_data(request.form)
+            #get full details from api response for each book
             books_to_import = [ book for book in books if book['isbn'] in form_data ]
+            #add books to the database
             for book in books_to_import:     
                 success, error = add_new_record(
                     connection=mysql.connection,
@@ -172,16 +174,19 @@ def import_books():
                             'average_rating':book["average_rating"],
                             'renting_cost':form_data.get(book["isbn"]).get('rent')
                             })
-            if success:
-                flash('The books were successfully imported','success')
-            else:
-                flash(f'Import could not be performed, following error occured {error}','error')
+                if success:
+                    continue
+                else:
+                    flash(f'Import could not be performed, following error occured {error}','error')
+                    break                
+            flash('The books were successfully imported','success')
             return redirect(url_for('books'))
         return render_template('import_books.html', books=books, csrf_form=csrf_form)
     else:
         no_books_message = "No books were found for that search."
         return render_template('import_books.html',no_books_message=no_books_message)
-@app.route('/view_book_details/<string:book_id>', methods=['GET'])
+    
+@app.route('/book/<string:book_id>', methods=['GET'])
 @login_required
 def view_book_details(book_id):
     book_details = get_record(
@@ -193,10 +198,11 @@ def view_book_details(book_id):
     delete_book_form = prefill_form_values(DeleteForm(),{'id':book_id})
     return render_template('view_book_details.html', book_details=book_details, delete_book_form=delete_book_form) 
 
-@app.route('/edit_book/<string:book_id>',methods=['GET','POST'])
+@app.route('/edit/<string:book_id>',methods=['GET','POST'])
 @login_required
 def edit_book(book_id):
     edit_book_form = AddBookForm() 
+    #get book details
     book_details = get_record(
         connection=mysql.connection,
         table_name='books',
@@ -204,6 +210,7 @@ def edit_book(book_id):
         isbn=book_id
     )   
     if request.method == 'POST' and edit_book_form.validate_on_submit():
+        #calculate new available count
         new_available_count =  get_new_available_count(
             old_available_count=book_details['available_count'],
             new_total_count=edit_book_form['total_count'].data,
@@ -238,7 +245,6 @@ def edit_book(book_id):
                 return redirect(url_for('books'))
             else:
                 flash(f'Book could not be edited, following error occured {error}','error')
-
     edit_book_form = prefill_form_values(edit_book_form,book_details)
     return render_template('edit_book.html',edit_book_form=edit_book_form)
 
@@ -348,9 +354,7 @@ def delete_member():
 @app.route('/transactions',methods=['GET'])
 @login_required
 def transactions():
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT books.title,members.name,transactions.issued_on,transactions.returned_on,transactions.amount_paid FROM books INNER JOIN transactions ON books.book_id=transactions.book_id INNER JOIN members ON transactions.member_id=members.member_id WHERE returned_on IS NOT NULL ORDER BY transactions.returned_on DESC")
-    transactions = cur.fetchall()
+    transactions = get_completed_transactions(mysql.connection)
     return render_template('transactions.html',transactions=transactions)
 
 @app.route('/issue_book',methods=['POST'])
@@ -358,59 +362,79 @@ def transactions():
 def issue_book():
     issue_book_form=IssueBookForm()
     if issue_book_form.validate_on_submit():
-        member_details = get_record(connection=mysql.connection,table_name='members',columns=('outstanding_debt',),member_id=issue_book_form.member_id.data)
-        if member_details['outstanding_debt'] <= 500:
+        #get member's oustanding debt
+        members_outstanding_debt = get_record(connection=mysql.connection,table_name='members',columns=('outstanding_debt',),member_id=issue_book_form.member_id.data)['outstanding_debt']
+        #issue book if debt is less than 500
+        if members_outstanding_debt <= 500:
             success, error = add_new_record(connection=mysql.connection,table_name='transactions',data_dict={
                     'book_id':issue_book_form.book_id.data,
                     'member_id':issue_book_form.member_id.data            
                 }
             )
             #update books table for rented and available count
-            cur = mysql.connection.cursor()
-            cur.execute("UPDATE books SET available_count=available_count-1,rented_count=rented_count+1 WHERE book_id=%s",[issue_book_form.book_id.data])
-            mysql.connection.commit()
-            cur.close()
-            flash("Book was issued","success")
+            success, error = update_book_count(connection=mysql.connection,book_id=issue_book_form.book_id.data,action='issue')
+            if success:
+                flash("Book was issued","success")
+            else:
+                flash(f"Book could not be issued, following error occured {error}",'error')
         else:
             flash("Member's outstanding debt is more than 500","error")
         return redirect(url_for('books'))
     
+def return_books_from_member(books_issued_by_member,returned_book_ids,member_id,total_amount_paid_by_member):
+    for book_id in returned_book_ids:
+        #get renting cost of the book being returned
+        total_renting_cost = [ book.get('total_renting_cost') for book in books_issued_by_member if book['book_id']==book_id][0]
+        #update transactions table
+        success, error = edit_record(
+            connection=mysql.connection,
+            table_name='transactions',
+            data_dict={
+                'returned_on':datetime.now(),
+                'amount_paid':total_renting_cost,
+            },
+            book_id=book_id,
+            member_id=member_id)
+        if success:
+            #update available and rented counts
+            success,error = update_book_count(connection=mysql.connection,book_id=book_id,action='return')
+            if success:
+                continue
+            else:
+                return (success,error)    
+        else:
+            return (success,error)     
+    #reduce member' outstanding debt by the amount paid
+    success,error = reduce_outstanding_debt(connection=mysql.connection,member_id=member_id,reduce_by=total_amount_paid_by_member)
+    return (success,error)
 
-@app.route('/return_book/from/<int:member_id>',methods=['GET','POST'])
+@app.route('/return/from/<int:member_id>',methods=['GET','POST'])
 @login_required
 def return_book(member_id):
     return_book_form = ReturnBookForm()
-    cur = mysql.connection.cursor()
-    count = cur.execute("SELECT books.book_id,books.title,books.renting_cost,transactions.issued_on FROM transactions INNER JOIN books ON transactions.book_id=books.book_id WHERE member_id=%s AND transactions.returned_on IS NULL",[member_id])
-    books_issued_by_member = cur.fetchall()
+    #get books issued by member
+    books_issued_by_member = get_books_issued_by_member(connection=mysql.connection,member_id=member_id)
     if books_issued_by_member:
-        books_issued_by_member = set_total_renting_cost_per_book(books_issued_by_member)  
+        #calculate renting cost of all books issued by member
+        books_issued_by_member = calculate_renting_cost_for_books(books_issued_by_member)
+        #populate return book form with values
         return_book_form.return_book.choices = [ (book['book_id'],book['title']) for book in books_issued_by_member ]
         if request.method =='POST' and return_book_form.validate_on_submit():
-            for book_id in return_book_form.return_book.data:
-                #update transactions table with returned_on date and amount paid where bookid
-                total_renting_cost = [ book.get('total_renting_cost') for book in books_issued_by_member if book['book_id']==book_id][0]
-                cur.execute("UPDATE transactions SET returned_on=%s,amount_paid=%s WHERE book_id=%s AND member_id=%s",[
-                    datetime.now(),
-                    total_renting_cost,
-                    book_id,
-                    member_id
-                ])
-                #update books table with available and rented count where book_id
-                cur.execute("UPDATE books SET available_count=available_count+1,rented_count=rented_count-1 WHERE book_id=%s",[book_id])
-
-            #update memebers with outstanding debt where member_id
-            cur.execute("UPDATE members SET outstanding_debt=outstanding_debt-%s WHERE member_id=%s",[return_book_form.total_amount_paid.data,member_id])
-            mysql.connection.commit()
-            cur.close()
+            success,error = return_books_from_member(
+                books_issued_by_member=books_issued_by_member,
+                returned_book_ids=return_book_form.return_book.data,
+                member_id=member_id,
+                total_amount_paid_by_member=return_book_form.total_amount_paid.data
+            )
+            if success:
+                flash('Book(s) returned successfully','success')
+            else:
+                flash(f'Book(s) could not be returned, following error occured {error}','error')
             return redirect(url_for('members'))
-        cur.close()
         return render_template('return_book.html',return_book_form=return_book_form,books=books_issued_by_member)
     else:
         flash("This member has no issued books",'error')
         return redirect(url_for('members'))
-
-
 
 @app.route('/logout')
 @login_required
@@ -418,10 +442,8 @@ def logout():
     session.pop('username', None)
     return redirect(url_for('login'))
 
-
-
 if __name__=="__main__":
     scheduler.start()
-    app.run(debug=True)
+    app.run(host="0.0.0.0",port=5000,debug=True)
 
 

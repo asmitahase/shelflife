@@ -84,10 +84,14 @@ content %}
           inputDiv.classList.toggle("hidden", !isChecked);
           if(isChecked){
               inputBookCount.setAttribute("name", `${checkbox.value}_count`)
+              inputBookCount.setAttribute("required","")
               inputRentingCost.setAttribute("name",`${checkbox.value}_rent`)
+              inputRentingCost.setAttribute("required","")
           }else{
             inputBookCount.removeAttribute("name")
+            inputBookCount.removeAttribute("required")
             inputRentingCost.removeAttribute("name")
+            inputRentingCost.removeAttribute("required")
           }
           const anyBookSelected = [...checkboxes].some(
             (checkbox) => checkbox.checked
