@@ -35,27 +35,41 @@ content %}
       </div>
     </form>
     <script>
-      const bookDetails = {{ books | tojson }}
-      const checkboxes = document.querySelectorAll("input[name='return_book']")
-      let amountToPay = 0
-      const totalAmountPaid = document.querySelector('#total_amount_paid')
-      const showTotalAmount = document.querySelector('#total-amount')
-      const returnButton = document.querySelector('#return-btn')
+      const bookDetails = {{ books | tojson }};
+      const checkboxes = document.querySelectorAll("input[name='return_book']");
+      let amountToPay = 0;
+      const totalAmountPaid = document.querySelector('#total_amount_paid');
+      const showTotalAmount = document.querySelector('#total-amount');
+      const returnButton = document.querySelector('#return-btn');
       checkboxes.forEach(checkbox => {
-          checkbox.classList.add('accent-catalina-blue-600','w-4','h-4')
-          checkbox.addEventListener('click',(event)=>{
-                const isChecked = checkbox.checked
-                checkbox.parentElement.classList.toggle('bg-catalina-blue-900/10', isChecked)
-                amountToPay = isChecked ? amountToPay + getRentingCost(checkbox.value) : amountToPay -    getRentingCost(checkbox.value)
-                showTotalAmount.textContent = 'Total amount to pay : ' + amountToPay
-                totalAmountPaid.value = amountToPay
-                const anyBookSelected = [...checkboxes].some((checkbox)=>checkbox.checked)
-                showTotalAmount.classList.toggle('hidden',!anyBookSelected)
-                anyBookSelected ? returnButton.removeAttribute('disabled') : returnButton.setAttribute('disabled','')
-              })
+        checkbox.classList.add('accent-catalina-blue-600', 'w-4', 'h-4');
+        checkbox.addEventListener('click', () => handleCheckboxClick(checkbox));
       });
+      function handleCheckboxClick(checkbox) {
+        const isChecked = checkbox.checked;
+        toggleCheckboxAppearance(checkbox, isChecked);
+        updateAmountToPay(checkbox.value, isChecked);
+        updateTotalAmountDisplay();
+        toggleReturnButton();
+      }
+      function toggleCheckboxAppearance(checkbox, isChecked) {
+        checkbox.parentElement.classList.toggle('bg-catalina-blue-900/10', isChecked);
+      }
+      function updateAmountToPay(value, isChecked) {
+        const rentingCost = getRentingCost(value);
+        amountToPay = isChecked ? amountToPay + rentingCost : amountToPay - rentingCost;
+      }
+      function updateTotalAmountDisplay() {
+        showTotalAmount.textContent = `Total amount to pay: ${amountToPay}`;
+        totalAmountPaid.value = amountToPay;
+      }
+      function toggleReturnButton() {
+        const anyBookSelected = Array.from(checkboxes).some(checkbox => checkbox.checked);
+        showTotalAmount.classList.toggle('hidden', !anyBookSelected);
+        returnButton.toggleAttribute('disabled', !anyBookSelected);
+      }
       function getRentingCost(bookId){
-          book = bookDetails.find((element)=>element['book_id'].toString() == bookId.toString())
+          const book = bookDetails.find((element)=>element['book_id'].toString() == bookId.toString())
           return book.total_renting_cost
       }
     </script>

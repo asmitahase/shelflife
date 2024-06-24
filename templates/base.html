@@ -15,26 +15,26 @@
     >
       <div class="font-semibold text-lg text-white">ShelfLife</div>
       <div class="flex flex-row gap-x-20 items-center font-medium text-base">
-          <a href="{{url_for('books')}}" class="hover:text-white">Books</a>
-          <a
-            class="hover:text-white"
-            href="{{url_for('members')}}"
-            >Members</a
-          >
-          <a class="hover:text-white" href="{{url_for('transactions')}}"
-            >Transactions</a
-          >
+        <a href="{{url_for('books')}}" class="hover:text-white">Books</a>
+        <a class="hover:text-white" href="{{url_for('members')}}">Members</a>
+        <a class="hover:text-white" href="{{url_for('transactions')}}"
+          >Transactions</a
+        >
       </div>
-      <div class="text-xs"><a href="{{url_for('logout')}}" class="text-white">Logout</a></div>
+      <div class="text-xs">
+        <a href="{{url_for('logout')}}" class="text-white">Logout</a>
+      </div>
     </div>
     <script>
-      (()=>{
-        //set a class to the currently active link
-        const currentPath = window.location.pathname
-        const links = document.querySelectorAll('a') 
-        const activeLink = [...links].find((link)=>link.pathname===currentPath)
-        activeLink?.classList.add('text-white')
-      })()
+      (() => {
+        //add a class to the currently active link
+        const currentPath = window.location.pathname;
+        const links = document.querySelectorAll("a");
+        const activeLink = [...links].find(
+          (link) => link.pathname === currentPath
+        );
+        activeLink?.classList.add("text-white");
+      })();
     </script>
     <div class="bg-zinc-50 rounded-md m-2 p-2 basis-11/12 overflow-auto">
       {% block content %}{% endblock %}

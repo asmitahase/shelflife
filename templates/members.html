@@ -20,14 +20,12 @@
         })
       </script>
         <a class="w-1/12 h-8" href="{{url_for('add_member')}}">
-            <!-- TODO add ring on hover to the buttons -->
             <button
             class="bg-catalina-blue-600 hover:bg-catalina-blue-800 text-white font-medium text-sm rounded-md h-full w-full"
             >
             Add Member
             </button>
-        </a>
-          
+        </a>  
         </div>
           <div class="flex justify-center" id="message">
             {% from 'includes/_formhelpers.html' import render_messages %}
@@ -54,7 +52,6 @@
                 <td class="pl-2 p-4">{{member.outstanding_debt}}</td>
                 <td class="p-4 flex justify-evenly">
                   <a href="{{url_for('return_book',member_id=member.member_id)}}">
-                <!-- TODO disable return button if the rented count is 0 -->
                     <button
                     class="shadow-md text-xs text-gray-600 bg-gray-50 border border-gray-400 hover:drop-shadow-lg hover:shadow-inner rounded-md w-16 h-7"
                     type="button">Return

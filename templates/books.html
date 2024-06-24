@@ -2,22 +2,32 @@
 %}
 <div class="h-full">
   <div class="flex flex-row justify-between p-4">
-      <form action="" method="get" class="flex flex-row justify-between items-center w-4/6 border border-zinc-300 shadow-sm rounded-md font-medium h-8 p-1 pr-0 bg-white">
-        <input
+    <form
+      action=""
+      method="get"
+      class="flex flex-row justify-between items-center w-4/6 border border-zinc-300 shadow-sm rounded-md font-medium h-8 p-1 pr-0 bg-white"
+    >
+      <input
         class="h-7 w-full border-0 text-xs text-gray-500 focus:outline-none p-2 mr-1 placeholder:text-xs"
         placeholder="Search for a book"
         id="search-box"
         name="search"
         value="{%if search%}{{search}}{% endif %}"
       />
-      <button type="submit" class="shadow-md text-xs text-gray-600 bg-gray-50 border border-gray-400 hover:drop-shadow-lg hover:shadow-inner rounded-md w-16 h-8 hidden" id="search-btn">Search</button>
-      </form>
+      <button
+        type="submit"
+        class="shadow-md text-xs text-gray-600 bg-gray-50 border border-gray-400 hover:drop-shadow-lg hover:shadow-inner rounded-md w-16 h-8 hidden"
+        id="search-btn"
+      >
+        Search
+      </button>
+    </form>
     <script>
-      const searchButton = document.querySelector('#search-btn') 
-      const searchBox = document.querySelector('#search-box') 
-      searchBox.addEventListener('keydown',(event)=>{
-          searchButton.classList.toggle('hidden',!event.target.value)
-      })
+      const searchButton = document.querySelector("#search-btn");
+      const searchBox = document.querySelector("#search-box");
+      searchBox.addEventListener("keydown", (event) => {
+        searchButton.classList.toggle("hidden", !event.target.value);
+      });
     </script>
     <div class="flex justify-between w-1/6 gap-2 text-sm">
       <a class="w-1/2 h-8" href="{{url_for('search_to_import')}}">
@@ -35,15 +45,14 @@
           Add book
         </button>
       </a>
-      
     </div>
   </div>
-    <div class="flex justify-center" id="message">
-      {% from 'includes/_formhelpers.html' import render_messages %}
-      {{ render_messages(get_flashed_messages()) }}
-    </div>
-    {% if books %}
-    <div class="p-4">
+  <div class="flex justify-center" id="message">
+    {% from 'includes/_formhelpers.html' import render_messages %} {{
+    render_messages(get_flashed_messages()) }}
+  </div>
+  {% if books %}
+  <div class="p-4">
     <table class="table-fixed w-full">
       <thead class="text-left text-gray-600 text-sm bg-gray-100">
         <th class="pl-2 p-4 w-[30rem]">Title</th>
@@ -72,10 +81,11 @@
           <td class="pl-2 p-4">{{book.rented_count}}</td>
           <td class="pl-2 p-4">{{book.available_count}}</td>
           <td class="p-4 flex justify-center">
-            <!-- TODO disbale issue button if the available count is 0 -->
             <button
               class="shadow-md text-xs text-gray-600 bg-gray-50 border border-gray-400 hover:drop-shadow-lg hover:shadow-inner rounded-md w-16 h-7"
-              type="button" value='{{book | tojson}}' onclick="openModal(event.target.value)"
+              type="button"
+              value='{{book | tojson}}'
+              onclick="openModal(event.target.value)"
             >
               Issue
             </button>
@@ -86,43 +96,67 @@
     </table>
     <dialog class="w-72 h-80 rounded-md shadow-lg">
       <div class="p-8 h-full">
-        <div class="font-semibold text-gray-700 text-base h-1/6">Issue Book</div>
-        <form action="{{url_for('issue_book')}}" method="post" class="flex flex-col justify-between h-5/6">
+        <div class="font-semibold text-gray-700 text-base h-1/6">
+          Issue Book
+        </div>
+        <form
+          action="{{url_for('issue_book')}}"
+          method="post"
+          class="flex flex-col justify-between h-5/6"
+        >
           {{issue_book_form.csrf_token()}}
-          {{issue_book_form.book_id.label(class="text-sm mb-6 font-medium text-gray-600")}}
+          {{issue_book_form.book_id.label(class="text-sm mb-6 font-medium
+          text-gray-600")}} 
           {{issue_book_form.book_id()}}
-          {{issue_book_form.member_id.label(class="text-sm font-medium text-gray-500")}}
-          {{issue_book_form.member_id(class="p-2 rounded-md bg-gray-200
-          focus:outline-none w-full h-8 text-sm font-medium text-gray-600")}}
-          <div class="mt-10">
-            <button type="button" id="close-btn" class="float-left bg-white border border-catalina-blue-600 rounded-md text-sm text-catalina-blue-600 font-medium hover:bg-gray-200 w-24 h-8">Cancel</button>
-            <button type="submit" class="float-right bg-catalina-blue-600 hover:bg-catalina-blue-800 text-white font-medium text-sm rounded-md w-24 h-8">Issue</button>
+          <div>
+            {{issue_book_form.member_id.label(class="text-sm font-medium
+            text-gray-500")}} 
+            {{issue_book_form.member_id(class="p-2 rounded-md
+            bg-gray-200 focus:outline-none w-full h-8 text-sm font-medium
+            text-gray-600")}}
           </div>
-        </form> 
+          <div class="mt-10">
+            <button
+              type="button"
+              id="close-btn"
+              class="float-left bg-white border border-catalina-blue-600 rounded-md text-sm text-catalina-blue-600 font-medium hover:bg-gray-200 w-24 h-8"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="float-right bg-catalina-blue-600 hover:bg-catalina-blue-800 text-white font-medium text-sm rounded-md w-24 h-8"
+            >
+              Issue
+            </button>
+          </div>
+        </form>
       </div>
     </dialog>
     <script>
-      const modal = document.querySelector('dialog')
-      let bookTitle = document.querySelector('label[for="book_id"]')
-      let bookId = document.querySelector('#book_id')
-      function openModal(bookDetails){
-          const bookDetailsJSON = JSON.parse(bookDetails)
-          bookTitle.innerHTML = bookDetailsJSON.title
-          bookId.value = bookDetailsJSON.book_id
-          modal.showModal()
+      const modal = document.querySelector("dialog");
+      let bookTitle = document.querySelector('label[for="book_id"]');
+      let bookId = document.querySelector("#book_id");
+      function openModal(bookDetails) {
+        const bookDetailsJSON = JSON.parse(bookDetails);
+        bookTitle.innerHTML = bookDetailsJSON.title;
+        bookId.value = bookDetailsJSON.book_id;
+        modal.showModal();
       }
-      const closeButton = document.querySelector('#close-btn')
-      closeButton.addEventListener('click',()=>{
-        modal.close()
-      })
+      const closeButton = document.querySelector("#close-btn");
+      closeButton.addEventListener("click", () => {
+        modal.close();
+      });
     </script>
+  </div>
+  {%elif no_books_message%}
+  <div class="w-full flex justify-center items-center h-5/6">
+    <div
+      class="rounded-md bg-gray-100 font-medium text-sm text-zinc-400 border border-gray-300 p-14"
+    >
+      {{no_books_message}}
     </div>
-    {%elif no_books_message%}
-    <div class="w-full flex justify-center items-center h-5/6">
-      <div class="rounded-md bg-gray-100 font-medium text-sm text-zinc-400 border border-gray-300 p-14">
-        {{no_books_message}}
-      </div>
-    </div>
-    {% endif %}
+  </div>
+  {% endif %}
 </div>
 {% endblock %}

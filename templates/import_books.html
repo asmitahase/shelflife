@@ -6,26 +6,24 @@ content %}
       <h1 class="text-2xl font-semibold mb-8 text-zinc-700">Import Books</h1>
       <div class="flex flex-row gap-x-2">
         <a href="{{url_for('books')}}"
-        ><button
-          type="button"
-          class="bg-white border border-catalina-blue-600 text-catalina-blue-600 rounded-md text-sm font-medium hover:bg-gray-300 w-24 h-8 ml-2"
+          ><button
+            type="button"
+            class="bg-white border border-catalina-blue-600 text-catalina-blue-600 rounded-md text-sm font-medium hover:bg-gray-300 w-24 h-8 ml-2"
+          >
+            Cancel
+          </button></a
         >
-          Cancel
-        </button></a
-      >
-      <button
-        id="import-btn"
-        type="submit"
-        form="import-books"
-        class="bg-catalina-blue-600 hover:bg-catalina-blue-800 text-white font-medium text-sm rounded-md w-24 h-8 disabled:bg-gray-200 disabled:border disabled:border-gray-400 disabled:text-gray-500"
-        disabled
-      >
-        Import
-      </button>
+        <button
+          id="import-btn"
+          type="submit"
+          form="import-books"
+          class="bg-catalina-blue-600 hover:bg-catalina-blue-800 text-white font-medium text-sm rounded-md w-24 h-8 disabled:bg-gray-200 disabled:border disabled:border-gray-400 disabled:text-gray-500"
+          disabled
+        >
+          Import
+        </button>
       </div>
-      
     </div>
-    
     {% if books %}
     <form action="" method="post" id="import-books">
       {{csrf_form.csrf_token()}}
@@ -48,23 +46,25 @@ content %}
             <td class="pl-2 p-4">{{book["isbn"]}}</td>
             <td class="pl-2 p-4">
               <div class="flex flex-row justify-end items-center gap-x-4">
-                <div class="flex flex-col justify-center items-center gap-y-1 hidden">
+                <div
+                  class="flex flex-col justify-center items-center gap-y-1 hidden"
+                >
                   <input
-                placeholder="Count"
-                class="p-2 rounded-md bg-gray-200 focus:outline-none focus:border-zinc-600 focus:ring-zinc-600 focus:ring-2 w-16 h-6 text-sm font-medium placeholder:text-xs placeholder:text-gray-500 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                type="number"
+                    placeholder="Count"
+                    class="p-2 rounded-md bg-gray-200 focus:outline-none focus:border-zinc-600 focus:ring-zinc-600 focus:ring-2 w-16 h-6 text-sm font-medium placeholder:text-xs placeholder:text-gray-500 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    type="number"
                   />
                   <input
-                placeholder="Rent"
-                class="p-2 rounded-md bg-gray-200 focus:outline-none focus:border-zinc-600 focus:ring-zinc-600 focus:ring-2 w-16 h-6 text-sm font-medium placeholder:text-xs placeholder:text-gray-500 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                type="number"
+                    placeholder="Rent"
+                    class="p-2 rounded-md bg-gray-200 focus:outline-none focus:border-zinc-600 focus:ring-zinc-600 focus:ring-2 w-16 h-6 text-sm font-medium placeholder:text-xs placeholder:text-gray-500 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    type="number"
                   />
                 </div>
-              <input
-                type="checkbox"
-                value="{{book['isbn']}}"
-                class="accent-catalina-blue-600 w-5 h-5"
-              />
+                <input
+                  type="checkbox"
+                  value="{{book['isbn']}}"
+                  class="accent-catalina-blue-600 w-5 h-5"
+                />
               </div>
             </td>
           </tr>
@@ -75,32 +75,41 @@ content %}
     <script>
       const checkboxes = document.querySelectorAll("input[type='checkbox']");
       const importButton = document.querySelector("#import-btn");
+
       checkboxes.forEach((checkbox) => {
         checkbox.addEventListener("click", () => {
-          const isChecked = checkbox.checked;
-          const inputDiv = checkbox.previousElementSibling;
-          const inputBookCount = inputDiv.firstElementChild;
-          const inputRentingCost = inputDiv.lastElementChild;
-          inputDiv.classList.toggle("hidden", !isChecked);
-          if(isChecked){
-              inputBookCount.setAttribute("name", `${checkbox.value}_count`)
-              inputBookCount.setAttribute("required","")
-              inputRentingCost.setAttribute("name",`${checkbox.value}_rent`)
-              inputRentingCost.setAttribute("required","")
-          }else{
-            inputBookCount.removeAttribute("name")
-            inputBookCount.removeAttribute("required")
-            inputRentingCost.removeAttribute("name")
-            inputRentingCost.removeAttribute("required")
-          }
-          const anyBookSelected = [...checkboxes].some(
-            (checkbox) => checkbox.checked
-          );
-          anyBookSelected
-            ? importButton.removeAttribute("disabled")
-            : importButton.setAttribute("disabled", "");
+          toggleInputFields(checkbox);
+          toggleImportButton();
         });
       });
+
+      function toggleInputFields(checkbox) {
+        const isChecked = checkbox.checked;
+        const inputDiv = checkbox.previousElementSibling;
+        const [inputBookCount, inputRentingCost] = inputDiv.children;
+        inputDiv.classList.toggle("hidden", !isChecked);
+        if (isChecked) {
+          setAttributes(inputBookCount, checkbox.value, "count");
+          setAttributes(inputRentingCost, checkbox.value, "rent");
+        } else {
+          removeAttributes(inputBookCount);
+          removeAttributes(inputRentingCost);
+        }
+      }
+      function setAttributes(element, value, suffix) {
+        element.setAttribute("name", `${value}_${suffix}`);
+        element.setAttribute("required", "");
+      }
+      function removeAttributes(element) {
+        element.removeAttribute("name");
+        element.removeAttribute("required");
+      }
+      function toggleImportButton() {
+        const anyBookSelected = Array.from(checkboxes).some(
+          (checkbox) => checkbox.checked
+        );
+        importButton.toggleAttribute("disabled", !anyBookSelected);
+      }
     </script>
     {% elif no_books_message %}
     <div class="w-full flex justify-center items-center h-5/6">

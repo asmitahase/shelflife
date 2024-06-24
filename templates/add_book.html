@@ -9,7 +9,6 @@
                 {{ render_messages(get_flashed_messages()) }}
               </div>
             <form action="" method="post">
-                <!-- TODO Required indicator in label -->
                 {{add_book_form.csrf_token()}}
                 {% from 'includes/_formhelpers.html' import render_form_field %}
                         {% for field in add_book_form._fields.values() if field.id != 'csrf_token' %}
