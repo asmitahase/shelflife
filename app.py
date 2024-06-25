@@ -23,7 +23,7 @@ scheduler.api_enabled = True
 scheduler.init_app(app)
 mysql = MySQL(app)
 #scheduler to update outstanding debt, becuase it increases with the number of days the books are rented for
-@scheduler.task('interval',id='update_outstanding_debt',seconds=100000)
+@scheduler.task('interval',id='update_outstanding_debt',seconds=3600)
 def update_oustanding_debt():
     print("scheduler started")
     with scheduler.app.app_context():
