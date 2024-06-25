@@ -1,10 +1,11 @@
 import mysql.connector
-import app_secrets
+
 mysql_db = mysql.connector.connect(
-    host=app_secrets.MYSQL_HOST,
-    port=app_secrets.MYSQL_PORT,
-    user=app_secrets.MYSQL_USER,
-    password=app_secrets.MYSQL_PASSWORD
+    host='your mysql host',
+    # if you are using your local mysql server comment the port
+    port=3306,
+    user='your mysql root user name',
+    password='your mysql password'
 )
 cur = mysql_db.cursor()
 
